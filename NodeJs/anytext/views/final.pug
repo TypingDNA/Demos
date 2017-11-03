@@ -1,0 +1,27 @@
+extends layout
+block content
+  div.container
+    //Finish learn
+    div.step(style={"display":"inline", "opacity":1})
+    p
+        if loggedIn
+            h4 Authentication OK!
+        else
+            h4 Authentication FAILED again (for the second time)
+    div
+        if loggedIn
+            p In a real life scenario you would be allowed to perform the desired action.
+        else
+            p Your typing patterns did not pass our 2-check authentication test. The patterns recorded for the username at enroll phase are different.
+    div(style={'padding-top':'20px'})
+        a.btn.btn-colors.btn-s(onclick="restart();" role="button")
+            b Start again
+  script.
+      (function() {
+          if(!isIframe()) {
+              var note = document.getElementById('note');
+              if(note) {
+                  note.style.display = 'block';
+              }
+          }
+      })();

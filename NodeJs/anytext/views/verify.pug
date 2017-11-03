@@ -1,0 +1,68 @@
+extends layout
+block content
+  div.container(style={"padding":"0"})
+    div.step(id="collect", style={"display":"inline", "opacity":1})
+        include ./flash
+        p
+            if attempts < 1
+                h4 Please type the text below (typos allowed):
+            else
+                h4 First check failed. Let's try one more time...
+        p
+            span.highlighted(id="pA1H")
+            span(id="pA1")
+        p
+            small
+                b Author:&nbsp
+                span(style={"color": "#999"}) #{author}
+        br
+        form(method="POST" onsubmit="return verifyText(this)")
+            textarea.form-control(rows="3", cols="100", id="inputtextbox", name="inputtextbox", oncopy="return false", onpaste="return false", onkeyup="highlight('pA1H','pA1', this)", placeholder="Type the text loaded above")
+            input(type="hidden" name="session_id", value=sid)
+            input(type="hidden" name="tp")
+            if attempts !== null
+                input(type="hidden" name="attempts" value=attempts)
+            br
+            div
+                button.btn.btn-colors.btn-s.disabled(role="button", id="btn_next", type="submit")
+                    b Next step
+                div.btn-group.quality-selector
+                    select(name="quality" style="height:40px").form-control
+                        option(value="1") Low security (quality = 1)
+                        option(value="2" selected='true') Standard (quality = 2)
+                        option(value="3") Strong security (quality = 3)
+    //Mobile device detected
+    div.step(id="mobile")
+      p
+          h4 Unsupported mobile device
+      div.message
+          p We're sorry but your mobile device is not supported yet.
+    div.step(id="step_loading")
+        br
+        p Loading...
+  script.
+    tdna = new TypingDNA(); /** creates an instance of the TypingDNA typing pattern recording class */
+    tdna.start(); /** starts the recording of a new typing pattern, will call tdna.reset() to reset later */
+    tdna.startDiagram();
+    var currentQuote = ''; /** the text to be typed at a each step, to be set independently */
+
+    /*****************************************************
+    * shows the first step of verification (1 of max 2),
+    * self executed at start
+    *****************************************************/
+    (function() {
+        currentTypeArea = document.getElementById('inputtextbox');
+        currentQuote = '!{currentQuote.replace(/'/g, "\\'")}';
+        highlight('pA1H', 'pA1');
+        currentTypeArea.focus();
+        if(!isIframe()){
+            var note = document.getElementById('note');
+            if(note) {
+                note.style.display = 'block';
+            }
+        }
+    })();
+
+    /** checks if Enter is pressed on text forms and calls the next function */
+    initControls();
+

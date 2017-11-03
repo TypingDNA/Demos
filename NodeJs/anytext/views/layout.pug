@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title= title
+    meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    link(rel="stylesheet", href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+    link(rel="stylesheet", href="/css/style.css" type="text/css")
+    script(src="/js/functions.js", type="application/javascript")
+    script(src="//typingdna.com/scripts/typingdna.js?v2.8")
+    script.
+      session_id = '#{sid}';
+  body
+    block content

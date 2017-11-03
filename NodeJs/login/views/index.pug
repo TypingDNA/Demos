@@ -1,0 +1,53 @@
+extends layout
+block content
+    div.container(style={"padding":"0"})
+        include ./flash
+        div#step_username.step(style={"display":"inline", "opacity":1, "padding":"15px 40px 0"})
+            //Select user
+            p
+                h4 Enter an email address and password that you would like to register.
+            p If you already registered in the demo, enter your previous email to be verified by typing biometrics.
+            br
+            form(method='post' onsubmit=' return validateUser(this)')
+                input(type="hidden" name="diagram")
+                input(type="hidden" name="textid")
+                div.input-group
+                    span.input-group-addon Your email
+                    input#username.form-control(autocomplete="off", type="text", name="username", placeholder="", value='', oncopy="return false", onpaste="return false")
+                br
+                div.input-group
+                    span.input-group-addon Password
+                    input#password.form-control(autocomplete="off", type="password", name="password", placeholder="", value='', oncopy="return false", onpaste="return false")
+                div(style={"padding-top": "20px"})
+                    button.btn.btn-colors.btn-s( role="button", id="btn_next", type="submit")
+                        b Next
+        //Loading
+        div#step_loading.step(style={"display":"inline", "padding":"15px 40px 0"})
+            br
+            p Loading...
+    script.
+        tdna = new TypingDNA(); /** creates an instance of the TypingDNA typing pattern recording class */
+        tdna.startDiagram(); /** starts the recording of a new typing pattern, will call tdna.reset() to reset later *
+         document.getElementById('username').focus();
+
+         /*****************************************************
+         * called after submitting a username; if username
+         * is ok it redirects to the verify page
+         *****************************************************/
+        function validateUser(form) {
+            if(!form) {
+                return false;
+            }
+            var username = document.getElementById("username");
+            if(username && username.value.length > 5) {
+                swapContent('step_username', 'step_loading');
+                var user = form.username.value.toString().trim();
+                var pass = form.password.value.toString().trim();
+                form.textid.value = TypingDNA.getTextId(user + pass);
+                form.diagram.value = tdna.getDiagram(user + pass);
+                return true;
+            } else {
+                alert('Your username/id should be at least 6 characters in length');
+                return false;
+            }
+        }
