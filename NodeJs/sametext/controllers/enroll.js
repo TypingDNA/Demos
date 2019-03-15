@@ -5,60 +5,57 @@ var typingDnaClient = global.typingDnaClient;
 
 var enroll = {
     /** GET enroll page. */
-    get: function(req, res)  {
+    get: function (req, res) {
         /** If there is no session data redirect to index */
-        if(!req.session || !req.session.data ||!req.session.data.internalUserId) {
-            return res.redirect(303,'index');
+        if (!req.session || !req.session.data || !req.session.data.internalUserId) {
+            return res.redirect(303, 'index');
         }
         var sessionData = req.session.data;
-        if(typeof sessionData.enrollPatterns === 'undefined') {
+        if (typeof sessionData.enrollPatterns === 'undefined') {
             sessionData.enrollPatterns = [];
         }
 
-        var messages = Object.assign({},sessionData.messages);
+        var messages = Object.assign({}, sessionData.messages);
         sessionData.messages = null;
 
         /** If we have more than 2 stored typing patterns enrollments process is over. */
-        if(sessionData.enrollPatterns.length >= 2) {
+        if (sessionData.enrollPatterns.length >= 2) {
             return res.render('enroll', {
                 title: 'Enroll new user - TypingDNA',
-                sid:req.sessionID,
+                sid: req.sessionID,
                 finish: sessionData.enrollPatterns.length >= 2,
                 messages: messages
             });
         }
 
-        /** We have less than 2 typing patterns, gat a new quote(text) and render the page. */
-        typingDnaClient.getQuote(160, 180, function(error, result) {
-            res.render('enroll', {
-                title: 'Enroll new user - TypingDNA',
-                sid:req.sessionID,
-                currentQuote: result.quote,
-                author: result.author,
-                finish: sessionData.enrollPatterns.length >= 2,
-                messages: messages,
-                step: sessionData.enrollPatterns.length + 1
-            });
+        res.render('enroll', {
+            title: 'Enroll new user - TypingDNA',
+            sid: req.sessionID,
+            currentQuote: global.config.sametext,
+            author: '',
+            finish: sessionData.enrollPatterns.length >= 2,
+            messages: messages,
+            step: sessionData.enrollPatterns.length + 1,
         });
     },
 
     /** POST enroll page. */
-    post: function(req, res)  {
+    post: function (req, res) {
         var sessionData = req.session.data;
         /** Verify if post body contains the typing pattern, if not display error message. */
-        if(!req.body.tp) {
-            return functions.displayError(req, res, {clearSession: true, message: 'Invalid typing pattern.'});
+        if (!req.body.tp) {
+            return functions.displayError(req, res, { clearSession: true, message: 'Invalid typing pattern.' });
         }
-        if(typeof sessionData.enrollPatterns === 'undefined') {
+        if (typeof sessionData.enrollPatterns === 'undefined') {
             sessionData.enrollPatterns = [];
         }
         /** Store the typing pattern in a session variable */
         sessionData.enrollPatterns.push(req.body.tp);
 
-        req.session.save(function() {
+        req.session.save(function () {
             /** If there are more than 2 stored typing patterns save them */
-            if(sessionData.enrollPatterns.length >= 2) {
-                var asyncTasks = [];
+            if (sessionData.enrollPatterns.length >= 2) {
+                let asyncTasks = [];
                 for(var i =0 ; i < sessionData.enrollPatterns.length; i++) {
                     let userId = sessionData.internalUserId;
                     let userTp = sessionData.enrollPatterns[i];
@@ -76,20 +73,20 @@ var enroll = {
                     })
                 }
                 /** Run async both save calls */
-                async.parallel(asyncTasks,function(err) {
-                    if(err) {
+                async.parallel(asyncTasks, function (err) {
+                    if (err) {
                         sessionData.enrollPatterns = [];
-                        sessionData.messages.errors.push({param: 'userId', msg:'Error enroling user'});
+                        sessionData.messages.errors.push({ param: 'userId', msg: 'Error enrolling user' });
                     }
                     /** Typing patterns are saved. */
-                    return  req.session.save(function(){
-                        res.redirect(303,'enroll');
+                    return req.session.save(function () {
+                        res.redirect(303, 'enroll');
                     })
                 });
             } else {
-                return  req.session.save(function(){
-                    res.redirect(303,'enroll');
-            })
+                return req.session.save(function () {
+                    res.redirect(303, 'enroll');
+                })
             }
         })
     }

@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    title= title
+    meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    link(rel="stylesheet", href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+    link(rel="stylesheet", href="/css/style.css" type="text/css")
+    script(src="/js/functions.js", type="application/javascript")
+    script(src="//typingdna.com/scripts/typingdna.js?v2.8")
+    link(href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,700", rel="stylesheet")
+    script(type="text/javascript", src="/plugins/jquery-1.12.3.min.js")
+    script(src='/plugins/js-gauge/js-gauge.min.js')
+    script.
+      session_id = '#{sid}';
+  body
+    block content
