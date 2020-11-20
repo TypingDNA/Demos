@@ -1,0 +1,35 @@
+{
+  "name": "sametext-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "debug": "nodemon --inspect ./bin/www"
+  },
+  "dependencies": {
+    "async": "^2.5.0",
+    "formidable": "^1.1.1",
+    "light-http-server": "^1.0.10",
+    "nodemon": "^2.0.4",
+    "pug": "^2.0.0-rc.4",
+    "typingdnaclient": "^1.0.0"
+  },
+  "description": "Basic implementation of typing pattern verification with TypingDNA.",
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TypingDNA/Demos.git"
+  },
+  "keywords": [
+    "logind",
+    "demo",
+    "typingdna"
+  ],
+  "author": "Stefan Endres",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/TypingDNA/Demos/issues"
+  },
+  "homepage": "https://github.com/TypingDNA/Demos#readme"
+}

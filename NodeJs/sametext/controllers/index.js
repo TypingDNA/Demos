@@ -1,23 +1,19 @@
-'use strict';
+const functions = require('../resources/functions');
 
-var functions = require('../resources/functions');
-var typingDnaClient = global.typingDnaClient;
-
-var index = {
+const index = {
     /** GET home page. */
     get: function (req, res) {
         /** If there are any messages in the session display them. */
-        var messages = Object.assign({}, req.session.data.messages);
+        const messages = Object.assign({}, req.session.data.messages);
         /** Reset session user data */
         if (req.session) {
             req.session.data = {
-                typingResult: 0,
                 typingFailedAttempts: 0,
                 lastResult: {},
                 lastTp: '',
                 internalUserId: null,
                 isNewUser: false,
-                diagramCount: 0,
+                patternCount: 0,
                 messages: {
                     errors: []
                 }
@@ -33,8 +29,8 @@ var index = {
     },
 
     /** POST home page. */
-    post: function (req, res) {
-        var sessionData = req.session.data;
+    post: async function (req, res) {
+        let sessionData = req.session.data;
         /** Verify if post body contains the user email, if not redirect to index */
         if (typeof req.body['username'] === 'undefined') {
             return functions.displayError(req, res, { clearSession: true, message: 'Invalid user email.' });
@@ -44,44 +40,39 @@ var index = {
          * DO NOT pass it to the browser, you will use the sessionData.internalUserId to enroll/verify the user
          */
         sessionData.internalUserId = functions.getInternalUserId(req.body.username);
-        var isMobile = global.functions.isMobile(req.headers['user-agent']);
-        var textId = parseInt(req.body.textid);
+        const isMobile = global.functions.isMobile(req.headers['user-agent']);
+        const textId = parseInt(req.body.textid);
         sessionData.device =  isMobile? 'mobile' : 'desktop';
-        /** Check if the user has previous saved typing patterns */
-        typingDnaClient.check(
-            {
-                userId: sessionData.internalUserId,
-                textId: textId,
-                device: sessionData.device ,
-                type: ['diagram']
-            },
-            function (error, result) {
-                if (error || result['count'] === undefined || result['success'] === 0) {
-                    return functions.displayError(
-                        req,
-                        res,
-                        { clearSession: true, message: 'Error checking user' + (result['message'] ? ': ' + result['message'] : '.') });
+        /** Check if the user has previously saved typing patterns */
+        const { error, result } = await functions.doCheckUser({
+            userId: sessionData.internalUserId,
+            textId: textId,
+            isMobile,
+            type: 1
+        });
+
+        if (error || !result || result.count === undefined || result.success === 0) {
+            const message = (error && error.message) || (result && result.message) || '';
+            functions.displayError(req, res, {
+                clearSession: true,
+                message: 'Error checking user. ' + message,
+            });
+        }
+        if (result.count === 0) {
+            req.session.isNewUser = true;
+        }
+        if (result.success === 1) {
+            sessionData.patternCount = result.count;
+            req.session.save(() => {
+                if (result.count >= 3) {
+                    /** User is all ready enrolled, redirect to verify. */
+                    res.redirect('verify')
+                } else {
+                    /** The user is not enrolled yet, redirect to enroll. */
+                    res.redirect('enroll')
                 }
-                if (result['count'] === 0 && result['mobilecount'] === 0) {
-                    req.session.isNewUser = true;
-                }
-                /** If thus is a mobile device check the mobilecount parameter. */
-                if (isMobile) {
-                    result['count'] = result['mobilecount'];
-                }
-                if (result['success'] === 1) {
-                    sessionData.diagramCount = result.count;
-                    req.session.save(function () {
-                        if (result.count > 0) {
-                            /** User is allready enrolled, redirect to verify. */
-                            res.redirect('verify')
-                        } else {
-                            /** The user is not enrolled yet, redirect to enroll. */
-                            res.redirect('enroll')
-                        }
-                    })
-                }
-            })
+            });
+        }
     }
 };
 

@@ -7,13 +7,13 @@ if messages
         div= error.msg + " "
           if error.link
             a(href=error.link.href) #{error.link.text}
-  if messages.info
+  if messages.info && messages.info.length > 0
     .alert.alert-info.fade.in
       button.close(type='button', data-dismiss='alert')
         i.fa.fa-times-circle-o
       for info in messages.info
         div= info.msg
-  if messages.success
+  if messages.success && messages.success.length > 0
     .alert.alert-success.fade.in
       button.close(type='button', data-dismiss='alert')
         i.fa.fa-times-circle-o

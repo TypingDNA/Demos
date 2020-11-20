@@ -1,29 +1,30 @@
 {
-  "name": "login-demo",
+  "name": "auto-login-demo",
   "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
-  },
   "dependencies": {
     "formidable": "^1.1.1",
     "light-http-server": "^1.0.10",
+    "nodemon": "^2.0.4",
     "pug": "^2.0.0-rc.4",
-    "typingdnaclient": "^1.0.0"
+    "typingdnaclient": "^1.1.1"
   },
-  "description": "Basic implementation of user login with TypingDNA.",
+  "description": "Basic implementation of user login with TypingDNA's /auto API",
   "main": "app.js",
-  "devDependencies": {},
+  "scripts": {
+    "start": "node ./bin/www",
+    "debug": "nodemon --inspect ./bin/www"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TypingDNA/Demos.git"
   },
   "keywords": [
-    "logind",
+    "login",
     "demo",
-    "typingdna"
+    "typingdna",
+    "auto"
   ],
-  "author": "Stefan Endres",
+  "author": "Laura Tamas",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/TypingDNA/Demos/issues"

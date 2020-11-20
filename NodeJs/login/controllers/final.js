@@ -1,81 +1,68 @@
 'use strict';
 
-var typingDnaClient = global.typingDnaClient;
+const typingDnaClient = global.typingDnaClient;
 
-var final = {
+const final = {
     /** GET final page. */
-    get: function(req, res) {
+    get: async function(req, res) {
         /** Check session variables for the last authentication result and display them. */
         if(!req.session ||
             !req.session.data ||
             !req.session.data.internalUserId) {
             return res.redirect('index')
         }
-        var sessionData = req.session.data;
-        var loggedIn = sessionData.typingResult === 1;
-        var debug = parseInt(req.query.debug) || 0;
-        var lastResult = sessionData.lastResult;
-        var wrongPassword = sessionData.wrongPassword;
-        var isNewUSer = sessionData.isNewUser;
-        var messages = Object.assign({},sessionData.messages);
-        var diagramCount = sessionData.diagramCount || 0;
-        var device = sessionData.device;
+
+        let sessionData = req.session.data;       
+        const { lastResult = {}, wrongPassword, isNewUser, device, internalUserId: userId, textId } = sessionData;
+        let { enrollments } = sessionData;
+
+        /** display error messages, if any */
+        const messages = Object.assign({}, sessionData.messages);
+        sessionData.messages = {};
+
+        /** handle result from /auto */
+        const action = lastResult.action === 'enroll' ? 'enroll' : 'verify';
+        const didEnroll = lastResult.enrollment == 1;
+        if (didEnroll) {
+            const { count } = await functions.doCheckUser({
+                userId, textId, type: 1, isMobile: device === 'mobile'
+            });
+            enrollments = count;
+        }
+
         res.render('final', {
             title: 'Final - TypingDNA',
             sid:req.sessionID,
-            loggedIn: loggedIn,
-            wrongPassword: wrongPassword,
-            displayDebug:debug,
-            lastResult: lastResult,
-            messages: messages,
-            isNewUser: isNewUSer,
-            diagramCount: diagramCount,
-            device: device
+            action,
+            showEnrollMessage: action === 'verify' && lastResult.enrollment == 1,
+            wrongPassword,
+            lastResult,
+            messages,
+            isNewUser,
+            device,
+            enrollments
         });
     },
 
-    /** POST final page. */
-    post: function(req, res) {
+     /** POST final page. */
+     post: function(req, res) {
         if(!req.session ||
             !req.session.data||
             !req.session.data.internalUserId) {
             return res.redirect('index')
         }
-        var sessionData = req.session.data;
-        var sessionUserId = sessionData.internalUserId;
+        let { wrongPassword, internalUserId: userId, device } = req.session.data;
 
-        var loggedIn = sessionData.typingResult === 1;
-        if(loggedIn) {
-            /** user is logged in, save the diagram */
-            if(sessionData.diagram) {
-                typingDnaClient.save(
-                    sessionUserId,
-                    sessionData.diagram,
-                    function(err) {
-                        if(err) {
-                            return functions.displayError(req, res, {clearSession: true, message: 'Error saving user data.'});
-                        }
-                        req.session.data = {};
-                        req.session.save(function() {
-                            return res.redirect('index');
-                        })
-                    })
-            } else {
-                return functions.displayError(req, res, {clearSession: true, message: 'Error saving user data.'});
-            }
-        } else {
-            /** User is not logged in, reset user data */
-            var params = {
-                userId: sessionUserId,
-                device: sessionData.device,
-                type: 'diagram'
-            };
-            typingDnaClient.delete(params, function(err) {
+        if(wrongPassword) {
+            /** User asked to reset the password */
+            typingDnaClient.delete({ userId, device, type: 1 }, function(err) {
                 if(err) {
                     return functions.displayError(req, res, {clearSession: true, message: 'Error resetting user data.'});
                 }
-                req.session.data = {};
-                req.session.save(function() {
+                req.session.data = {
+                    messages: { info: [{ msg: 'Your password was reset successfully' }] }
+                };
+                req.session.save(() => {
                     return res.redirect('index');
                 })
             })

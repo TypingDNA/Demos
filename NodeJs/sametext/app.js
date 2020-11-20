@@ -1,14 +1,12 @@
-'use strict';
-
-var server = require('light-http-server');
-var path = require('path');
+const server = require('light-http-server');
+const path = require('path');
 
 
 global.config = require('./resources/config');
 global.functions = require('./resources/functions');
 
 /** Initialize TypingDnaClient. The client will make the API requests. */
-var TypingDnaClient = require('typingdnaclient');
+const TypingDnaClient = require('typingdnaclient');
 global.typingDnaClient = new TypingDnaClient(
     global.config.typingDNA.apiKey,
     global.config.typingDNA.apiSecret,
@@ -30,7 +28,7 @@ server.set('session', {
 /**
  *  Ensure that the page is not cached
  */
-server.use(function(req, res, next) {
+server.use((req, res, next) => {
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.header('Expires', '-1');
     res.header('Pragma', 'no-cache');
@@ -40,8 +38,8 @@ server.use(function(req, res, next) {
 /**
  *  Get request fields from url and body
  */
-server.use(function(req, res, next) {
-    functions.getRequestFields(req,{},function(){
+server.use((req, res, next) => {
+    functions.getRequestFields(req, {}, () => {
         next();
     })
 });
@@ -54,7 +52,7 @@ require('./routes/demo')(server);
 /**
  * Catch 404 and forward to error handler
  */
-server.use(function(req, res) {
+server.use((req, res) => {
     res.status(404);
     res.send('Page not found')
 

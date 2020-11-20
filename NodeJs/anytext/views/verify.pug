@@ -1,6 +1,6 @@
 extends layout
 block content
-  div.container(style={"padding":"0"})
+  div.container
     div.step(id="collect", style={"display":"inline", "opacity":1})
         include ./flash
         p
@@ -26,11 +26,6 @@ block content
             div
                 button.btn.btn-colors.btn-s.disabled(role="button", id="btn_next", type="submit")
                     b Next step
-                div.btn-group.quality-selector
-                    select(name="quality" style="height:40px").form-control
-                        option(value="1") Low security (quality = 1)
-                        option(value="2" selected='true') Standard (quality = 2)
-                        option(value="3") Strong security (quality = 3)
     //Mobile device detected
     div.step(id="mobile")
       p
@@ -41,9 +36,9 @@ block content
         br
         p Loading...
   script.
+    typingVisualizer = new TypingVisualizer();
+    typingVisualizer.addTarget(['inputtextbox']);
     tdna = new TypingDNA(); /** creates an instance of the TypingDNA typing pattern recording class */
-    tdna.start(); /** starts the recording of a new typing pattern, will call tdna.reset() to reset later */
-    tdna.startDiagram();
     var currentQuote = ''; /** the text to be typed at a each step, to be set independently */
 
     /*****************************************************

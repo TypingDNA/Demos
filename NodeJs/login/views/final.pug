@@ -4,34 +4,7 @@ block content
         //Finish learn
         include ./flash
         div#final.step.contact-form-inner.form-horizontal(style={"display":"inline", "opacity":1, "padding":"15px 40px 0"})
-            if loggedIn
-                .form-group
-                    p#title
-                        | Authentication succeeded!
-                .form-group
-                    div
-                        | You have
-                        b(style="color: #1c8c09")   successfully logged in
-                        |   with typing biometrics verification and identified as being the correct user.
-                .form-group
-                    p Enroll this new typing behavior to increase the accuracy for further authentication.
-                    form#sbmForm(method="post")
-                        a(href="javascript: submitform()") Enroll typing behavior
-                    div(style={'padding-top': '20px'})
-                        button#btn_next.btn.btn-finance(onclick="restart(" + (displayDebug ? 'true' : 'false') + ",'index');" role="button" style='float:left; margin-right: 20px;')
-                            b Try Again
-                .form-group
-                    .panel.panel-default
-                        .panel-body
-                            span Device : #{device}
-                            br
-                            span Enrollments found : #{diagramCount}
-                            br
-                            br
-                            span Match : #{lastResult.result === 1 ? 'True' : 'False'}
-                            br
-                            span Score : #{lastResult.score}%
-            else if wrongPassword
+            if wrongPassword
                 .form-group
                     p#title
                         | Credentials don’t match.
@@ -47,46 +20,71 @@ block content
                         | If you forgot the password,
                         a(href="javascript: submitform()")  click here to reset.
                     div(style={'padding-top': '20px'})
-                        button#btn_next.btn.btn-finance(onclick="restart(" + (displayDebug ? 'true' : 'false') + ",'index');" role="button" style='float:left; margin-right: 20px;')
+                        button#btn_next.btn.btn-finance(onclick="restart();" role="button" style='float:left; margin-right: 20px;')
                             b Try Again
-            else if isNewUser
-                .form-group
-                    p#title
-                        | Registration finished! Try to Authenticate.
-                .form-group
-                    div
-                        | You have
-                        b   successfully registered.
-                        |  Use the same email and password, in order to demo the typing biometrics authentication.
-                        br
-                    div(style={'padding-top': '20px'})
-                        button#btn_next.btn.btn-finance(onclick="restart(" + (displayDebug ? 'true' : 'false') + ",'index');" role="button" style='float:left; margin-right: 20px;')
-                            b Try Authentication
+            else if action === 'verify'
+                if lastResult.result === 1
+                    h4.result-title(style={'margin-left': '-15px'}) Authentication succeeded!
+                    .form-group.demo-bm
+                        .panel.panel-default.panel-result(style="margin-bottom: 5px;")
+                            .panel-body
+                                .col-md-8.col-xs-12.demo-result
+                                    div.name TypingDNA result
+                                        span.result-green #{lastResult.result === 1 ? 'true' : 'false'}
+                                    div.name Confidence
+                                        span.result #{lastResult.highConfidence == 1 ? 'High' : 'Low' }    
+                                    div.name Device
+                                        span.result #{device}
+                                    div.name Enrollments
+                                        span.result#enrollments #{enrollments}
+                        if showEnrollMessage
+                            i.fa.fa-check(style='color:#1fb01f')
+                            p#autoenroll(style='display:inline;') This typing pattern has been automatically <b>enrolled</b>, as the <b>score > 90</b>
+                        div(style={'padding-top': '20px'})
+                            a.btn.btn-colors.btn-s(onclick="restart();" role="button" style={'margin-top':'20px'})
+                                b Try again          
+                    span.result-title
+                else
+                    .form-group(style="margin-bottom: 5px;")
+                        h4.result-title Authentication failed!
+                    .form-group.demo-bm
+                        .panel.panel-default.panel-result
+                            .panel-body
+                                .col-md-8.col-xs-12.demo-result
+                                    div.name TypingDNA result
+                                        span.result-red #{lastResult.result === 1 ? 'true' : 'false'}
+                                    div.name Confidence
+                                        span.result #{lastResult.highConfidence == 1 ? 'High' : 'Low' }    
+                                    div.name Device
+                                        span.result #{device}
+                                    div.name Enrollments
+                                        span.result#enrollments #{enrollments}
+                        div(style={'padding-top': '20px'})
+                                button#btn_next.btn.btn-finance(onclick="restart();" role="button" style='float:left; margin-right: 20px;')
+                                    b Try Again
             else
                 .form-group
-                    p#title
-                        | Authentication failed!
+                    h4.result-title
+                        if enrollments >= 3
+                            | Registration finished! Try to authenticate.
+                        else
+                            | Congratulations, you have enrolled a new pattern!
                 .form-group
+                    span.result-title
                     div
-                        | Your
-                        b(style="color:#d42626")   typing behavior is not the same
-                        |  as the one used during registration of this email address and password.
+                        if enrollments >= 3
+                            | You have
+                            b   successfully registered.
+                            |  Use the same email and password, in order to demo the typing biometrics authentication.
+                        else
+                            | For a successful authentication, you need at least #{3 - enrollments} more typing pattern#{3- enrollments > 1 ? 's' : ''}.
                         br
-                        | Try again by typing the way you did when you registered.
                     div(style={'padding-top': '20px'})
-                        button#btn_next.btn.btn-finance(onclick="restart(" + (displayDebug ? 'true' : 'false') + ",'index');" role="button" style='float:left; margin-right: 20px;')
-                            b Try Again
-                .form-group
-                    .panel.panel-default
-                        .panel-body
-                            span Device : #{device}
-                            br
-                            span Enrollments found : #{diagramCount}
-                            br
-                            br
-                            span Match : #{lastResult.result === 1 ? 'True' : 'False'}
-                            br
-                            span Score : #{lastResult.score}%
+                        button#btn_next.btn.btn-finance(onclick="restart();" role="button" style='float:left; margin-right: 20px;')
+                            if enrollments >= 3
+                                b Try Authentication
+                            else
+                                b Continue
         //Loading
         div.step.form-group(id="step_loading")
             .loader(style="top: 50%;left: 50%;margin: -50px 0 0 -25px; width: 50px;height: 50px;")

@@ -1,22 +1,27 @@
 'use strict';
 
-var index = require('../controllers/index');
-var final = require('../controllers/final');
+const index = require('../controllers/index');
+const final = require('../controllers/final');
 
 function initSessionVars() {
-    return function(req, res, next) {
+    return (req, res, next) => {
         if(!req.session.data) {
             req.session.data = {};
         }
-        if(!req.session.data.messages || !req.session.data.messages.errors) {
+        if(!req.session.data.messages) {
             req.session.data.messages = {};
+        }
+        if(!req.session.data.messages.errors) {
             req.session.data.messages.errors =  [];
+        }
+        if(!req.session.data.messages.info) {
+            req.session.data.messages.info =  [];
         }
         next();
     }
 }
 
-module.exports = function(app){
+module.exports = app => {
     app.use(initSessionVars());
     app.get('/', index.get);
     app.post('/', index.post);

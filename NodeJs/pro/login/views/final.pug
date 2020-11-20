@@ -1,0 +1,109 @@
+extends layout
+block content
+    div.container
+        //Finish learn
+        include ./flash
+        div#final.step.contact-form-inner.form-horizontal(style={"display":"inline", "opacity":1, "padding":"15px 40px 0"})
+            if loggedIn
+                h4.result-title(style={'margin-left': '-15px'}) Authentication succeeded!
+                .form-group.demo-bm
+                    .panel.panel-default.panel-result(style="margin-bottom: 5px;")
+                        .panel-body
+                            .col-md-4.col-xs-12.demo-chart
+                                div(style={'vertical-align': 'middle'})
+                                    div.gauge(id='g1', data-percent = lastResult.score, data-color = resultColour, data-text-bg-color='#fbfbfb')
+                                        div.indicator-left
+                                            div.indicator-left-inner
+                                        div.indicator-right
+                                            div.indicator-right-inner
+                                        div.inner
+                            .col-md-8.col-xs-12.demo-result
+                                div.name TypingDNA match
+                                    span.result-green #{loggedIn ? 'true' : 'false'}
+                                div.name Confidence
+                                    span.result #{confidence}    
+                                div.name Device
+                                    span.result #{device}
+                                div.name Enrollments
+                                    span.result#enrollments #{patternCount}
+                    if showEnroll
+                        i.fa.fa-check(style='color:#1fb01f')
+                        p#autoenroll(style='display:inline;') This typing pattern has been automatically <b>enrolled</b>, as the <b>score > 90</b>
+                    div(style={'padding-top': '20px'})
+                        a.btn.btn-colors.btn-s(onclick="restart();" role="button" style={'margin-top':'20px'})
+                            b Try again          
+                span.result-title
+            else if wrongPassword
+                .form-group
+                    p#title
+                        | Credentials don’t match.
+                .form-group
+                    div
+                        | The typed
+                        b   password is incorrect.
+                        |  Please try again by using the correct password associated with this email.
+                        br
+                .form-group
+
+                    form#sbmForm(method="post")
+                        | If you forgot the password,
+                        a(href="javascript: submitform()")  click here to reset.
+                    div(style={'padding-top': '20px'})
+                        button#btn_next.btn.btn-finance(onclick="restart();" role="button" style='float:left; margin-right: 20px;')
+                            b Try Again
+            else if isNewUser
+                .form-group
+                    h4.result-title
+                        | Registration finished! Try to Authenticate.
+                .form-group
+                    div
+                        | You have
+                        b   successfully registered.
+                        |  Use the same email and password, in order to demo the typing biometrics authentication.
+                        br
+                    div(style={'padding-top': '20px'})
+                        button#btn_next.btn.btn-finance(onclick="restart();" role="button" style='float:left; margin-right: 20px;')
+                            b Try Authentication
+            else
+                .form-group(style="margin-bottom: 5px;")
+                    h4.result-title Authentication failed!
+                .form-group.demo-bm
+                    .panel.panel-default.panel-result
+                        .panel-body
+                            .col-md-4.col-xs-12.demo-chart
+                                div(style={'display': 'inline-block', 'vertical-align': 'middle'})
+                                    div.gauge(id='g1', data-percent=lastResult.score, data-color=resultColour, data-text-bg-color='#fbfbfb')
+                                        div.indicator-left
+                                            div.indicator-left-inner
+                                        div.indicator-right
+                                            div.indicator-right-inner
+                                        div.inner
+                            .col-md-8.col-xs-12.demo-result
+                                div.name TypingDNA match
+                                    span.result-red #{loggedIn ? 'true' : 'false'}
+                                div.name Confidence
+                                    span.result #{confidence}    
+                                div.name Device
+                                    span.result #{device}
+                                div.name Enrollments
+                                    span.result#enrollments #{patternCount}
+                    div(style={'padding-top': '20px'})
+                            button#btn_next.btn.btn-finance(onclick="restart();" role="button" style='float:left; margin-right: 20px;')
+                                b Try Again
+        //Loading
+        div.step.form-group(id="step_loading")
+            .loader(style="top: 50%;left: 50%;margin: -50px 0 0 -25px; width: 50px;height: 50px;")
+    script.
+        function submitform() {
+            swapContent('final', 'step_loading');
+            var form = document.getElementById('sbmForm')
+            form && form.submit()
+        }
+        (function() {
+            if(!isIframe()) {
+                var note = document.getElementById('note');
+                if(note) {
+                    note.style.display = 'block';
+                }
+            }
+        })();

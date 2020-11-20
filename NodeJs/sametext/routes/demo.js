@@ -1,12 +1,10 @@
-'use strict';
-
-var index = require('../controllers/index');
-var verify = require('../controllers/verify');
-var enroll = require('../controllers/enroll');
-var final = require('../controllers/final');
+const index = require('../controllers/index');
+const verify = require('../controllers/verify');
+const enroll = require('../controllers/enroll');
+const final = require('../controllers/final');
 
 function initSessionVars() {
-    return function(req, res, next) {
+    return (req, res, next) => {
         if(!req.session.data) {
             req.session.data = {};
         }
@@ -18,7 +16,7 @@ function initSessionVars() {
     }
 }
 
-module.exports = function(app){
+module.exports = app => {
     app.use(initSessionVars());
     app.get('/', index.get);
     app.post('/', index.post);

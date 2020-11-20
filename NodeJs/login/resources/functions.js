@@ -1,11 +1,12 @@
 'use strict';
 
-var formidable = require('formidable');
-var url = require('url');
-var crypto = require('crypto');
-var qs = require('querystring');
+const formidable = require('formidable');
+const url = require('url');
+const crypto = require('crypto');
+const qs = require('querystring');
+const typingDnaClient = global.typingDnaClient;
 
-var functions = {
+const functions = {
     getInternalUserId: function(user, privateKey) {
         /**
          *  This is only a sample of generating an id from a username and a key,
@@ -15,7 +16,7 @@ var functions = {
     },
 
     isMobile: function(ua){
-        var check = false;
+        let check = false;
         (function(a) {
             if(
                 /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i
@@ -32,7 +33,7 @@ var functions = {
         request.body = {};
         request.query = {};
         if (request.method === 'POST') {
-            var postData = new formidable.IncomingForm();
+            const postData = new formidable.IncomingForm();
             postData.parse(request, function(err, fields) {
                 if (err) {
                     callback && callback();
@@ -41,8 +42,8 @@ var functions = {
                 callback && callback(fields);
             })
         } else if (request.method === 'GET') {
-            var query = url.parse(request.url).query;
-            var fields;
+            const query = url.parse(request.url).query;
+            let fields;
             if (query) {
                 try {
                     fields = qs.parse(query);
@@ -57,11 +58,12 @@ var functions = {
             callback && callback ()
         }
     },
+
     displayError: function(req, res, options) {
         if(!req || !res) {
             return;
         }
-        var opts = {
+        let opts = {
             message: 'An error occurred. Please retry.',
             redirectUrl: 'index',
             clearSession: false
@@ -72,18 +74,66 @@ var functions = {
             opts.clearSession = options.clearSession || opts.clearSession;
         }
         req.session.data.messages.errors.push({param: 'err', msg: opts.message});
-        var messages = Object.assign({},req.session.data.messages);
+        const messages = Object.assign({},req.session.data.messages);
         if(opts.clearSession) {
             req.session.data = {
-                messages: messages
+                messages
             };
         }
         req.session.save(function() {
             return res.redirect(opts.redirectUrl || 'index');
         })
-    }
+    },
+
+    sleep: function(time = 1000) {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(), time);
+        })
+    },
+
+    doCheckUser: function ({ userId, type, textId, isMobile, count = 0 }) {
+        return new Promise((resolve, reject) => {
+            typingDnaClient.check({ userId, type, textId }, async (error, result) => {
+                if (error || !result) { return reject(error || 'Failed to check user'); }
+
+                /** handle Too many requests (1 request/ 1 sec allowed on Developer plan)
+                 * If status 429 is received, wait for 1 sec and retry the request
+                 */
+                if (result.statusCode === 429) {
+                    if (count > 10) { return reject('Failed to check user'); }
+
+                    await this.sleep();
+                    const result = await this.doCheckUser({ userId, type, textId, isMobile, count: ++count });
+                    result.count = isMobile ? result.mobilecount : result.count;
+                    resolve(result);
+                } else {
+                    result.count = isMobile ? result.mobilecount : result.count;
+                    resolve(result);
+                }
+            });
+        })
+    },
+
+    doAuto: function (userId, typingPattern, count = 0) {
+        return new Promise((resolve, reject) => {
+            typingDnaClient.auto(userId, typingPattern, async (error, result) => {
+                if (error || !result) { return reject(error || 'Failed to authenticate user'); }
+
+                /** handle Too many requests (1 request/ 1 sec allowed on Developer plan)
+                 * If status 429 is received, wait for 1 sec and retry the request
+                 */
+                if (result.statusCode === 429) {
+                    if (count > 10) { return reject('Failed to authenticate user'); }
+
+                    await this.sleep();
+                    const result = await this.doAuto(userId, typingPattern, ++count);
+                    resolve(result);
+                } else {
+                    resolve(result);
+                }
+            })
+        })
+    },
 };
-
-
 
 module.exports = functions;

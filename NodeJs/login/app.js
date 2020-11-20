@@ -1,19 +1,18 @@
 'use strict';
 
-var server = require('light-http-server');
-var path = require('path');
-
+const server = require('light-http-server');
+const path = require('path');
 
 global.config = require('./resources/config');
-global.functions = require('./resources/functions');
 
 /** Initialize TypingDnaClient. The client will make the API requests. */
-var TypingDnaClient = require('typingdnaclient');
+const TypingDnaClient = require('typingdnaclient');
 global.typingDnaClient = new TypingDnaClient(
     global.config.typingDNA.apiKey,
     global.config.typingDNA.apiSecret,
     global.config.typingDNA.apiServer);
 
+global.functions = require('./resources/functions');
 
 /**
  * View engine setup

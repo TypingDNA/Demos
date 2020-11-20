@@ -1,27 +1,50 @@
 extends layout
 block content
-  div.container
-    //Finish learn
-    div.step(style={"display":"inline", "opacity":1})
-    p
-        if loggedIn
-            h4 Authentication OK!
-        else
-            h4 Authentication FAILED again (for the second time)
-    div
-        if loggedIn
-            p In a real life scenario you would be allowed to perform the desired action.
-        else
-            p Your typing patterns did not pass our 2-check authentication test. The patterns recorded for the username at enroll phase are different.
-    div(style={'padding-top':'20px'})
-        a.btn.btn-colors.btn-s(onclick="restart();" role="button")
-            b Start again
-  script.
-      (function() {
-          if(!isIframe()) {
-              var note = document.getElementById('note');
-              if(note) {
-                  note.style.display = 'block';
-              }
-          }
-      })();
+    div.container(style={"max-width": "450px;"})
+        //Finish learn
+        div.step(style={"display":"inline", "opacity":1})
+            if loggedIn
+                h4.result-title Authentication succeeded!
+                .form-group.demo-bm
+                    .panel.panel-default.panel-result(style="margin-bottom: 5px;")
+                        .panel-body
+                            .col-md-8.col-xs-12.demo-result
+                                div.name TypingDNA result
+                                    span.result-green #{lastResult.result === 1 ? 'true' : 'false'}
+                                div.name Confidence
+                                    span.result #{confidence}
+                                div.name Device
+                                    span.result #{device}
+                                div.name Enrollments
+                                    span.result#enrollments #{patternCount}
+                    if showEnroll
+                        i.fa.fa-check(style='color:#1fb01f')
+                        p#autoenroll(style='display:inline;') This typing pattern has been automatically <b>enrolled</b>, as the <b>score > 90</b>
+                span.result-title
+            else
+                .form-group(style="margin-bottom: 5px;")
+                    h4.result-title Authentication failed!
+                .form-group.demo-bm
+                    .panel.panel-default.panel-result
+                        .panel-body
+                            .col-md-8.col-xs-12.demo-result
+                                div.name TypingDNA result
+                                    span.result-red #{lastResult.result === 1 ? 'true' : 'false'}
+                                div.name Confidence
+                                    span.result #{confidence}
+                                div.name Device
+                                    span.result #{device}
+                                div.name Enrollments
+                                    span.result#enrollments #{patternCount}
+        div
+            a.btn.btn-colors.btn-s(onclick="restart();" role="button" style={'margin-top':'20px'})
+                b Try again
+    script.
+        (function() {
+            if(!isIframe()) {
+                var note = document.getElementById('note');
+                if(note) {
+                    note.style.display = 'block';
+                }
+            }
+        })();

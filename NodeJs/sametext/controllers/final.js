@@ -1,39 +1,28 @@
-'use strict';
-
 /** GET final page. */
 function final(req, res) {
     /** If there is no session data redirect to index */
     if (!req.session || !req.session.data || !req.session.data.internalUserId) {
         return res.redirect(303, 'index');
     }
-    let sessionData = req.session.data;
+    const sessionData = req.session.data;
+
     /** Check session variables for the last authentication result and display them. */
-    var loggedIn = (req.session && req.session.data.typingResult === 1);
-    var lastResult = req.session.data.lastResult;
-    var diagramCount = sessionData.diagramCount || 0;
-    var device = sessionData.device || 'desktop';
-    var resultColour = '#f8cd00';
-    var showEnroll = false;
-    if (lastResult && lastResult.score) {
-        if (lastResult.score > 75) {
-            showEnroll = true;
-        }
-        if (lastResult.score < 50) {
-            resultColour = '#c70000'
-        }
-        else if (lastResult.score >= 70) {
-            resultColour = '#45bb64'
-        }
+    const lastResult = sessionData.lastResult;
+    let patternCount = sessionData.patternCount || 0;
+    const device = sessionData.device || 'desktop';
+    /** displays if autoenroll happened in the background */
+    let showEnroll = lastResult.enrollment === 1;
+    if (lastResult.enrollment === 1) {
+        patternCount++;
     }
+
     res.render('final', {
         title: 'Final - TypingDNA',
         sid: req.sessionID,
-        loggedIn: loggedIn,
-        lastResult: lastResult,
-        diagramCount: diagramCount,
-        device: device,
-        resultColour: resultColour,
-        showEnroll: showEnroll
+        lastResult,
+        patternCount,
+        device,
+        showEnroll,
     });
     req.session.data = {};
 }

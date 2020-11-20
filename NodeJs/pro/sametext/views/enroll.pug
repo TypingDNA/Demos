@@ -1,6 +1,6 @@
 extends layout
 block content
-  div.container(style={"padding":"0"})
+  div.container
     include ./flash
     if(!finish)
         div.step(id="collect", style={"display":"inline", "opacity":1})
@@ -12,14 +12,10 @@ block content
             p
                 span.highlighted(id="pAH")
                 span(id="pA")
-            p
-                small
-                    b Author:&nbsp
-                    span(style={"color":"#999"}) #{author}
             br
-            textarea.form-control(rows="3", cols="100", id="inputtextbox", name="inputtextbox", oncopy="return false", onpaste="return false", onkeyup="highlight('pAH','pA', this)", placeholder="Type the text loaded above")
+            textarea.form-control(rows="1", cols="100", id="inputtextbox", name="inputtextbox", oncopy="return false", onpaste="return false", onkeyup="highlight('pAH','pA', this)", placeholder="Type the text loaded above")
             br
-            form(method='POST', onsubmit='return enroll(this)')
+            form(method='POST', onsubmit='return verifyText(this)')
                 input(type="hidden" name="session_id", value=sid)
                 input(type="hidden" name="tp")
                 div
@@ -32,17 +28,18 @@ block content
                 h4 Done
             div.message
                 p The user is now enrolled
-            div
-                a.btn.btn-colors.btn-s(onclick="restart();" role="button")
-                    b Start again
+        div
+            a.btn.btn-colors.btn-s(onclick="restart();" role="button")
+                b Start again
     //Loading
     div.step(id="step_loading")
         br
         p Loading...
     if(!finish)
       script.
+          typingVisualizer = new TypingVisualizer();
+          typingVisualizer.addTarget(['inputtextbox']);
           tdna = new TypingDNA(); /** creates an instance of the TypingDNA typing pattern recording class */
-          tdna.start(); /** starts the recording of a new typing pattern, will call tdna.reset() to reset later */
           var tp = ''; /** the typing pattern String variable to be recorded and to be sent to the server/API */
           var currentQuote = ''; /** the text to be typed at a each step, to be set independently */
           var nextFunction; /** a proxy for the next function in chain */
@@ -56,37 +53,9 @@ block content
               currentQuote = '!{currentQuote.replace(/'/g, "\\'")}';
               highlight('pAH', 'pA');
               currentTypeArea.focus();
-              nextFunction = enroll;
+              nextFunction = verifyText;
               /** sets the next function */
           })();
-
-          /*****************************************************
-           * called after finishing the second learning step;
-           * if second text is ok, shows the finish page;
-           *****************************************************/
-          function enroll(form) {
-              if(!form) {
-                  return false;
-              }
-              if(fastCompareTexts(document.getElementById("inputtextbox").value, currentQuote) > 0.7) {
-                  /** at least 70% of the words should be typed correctly */
-                  var tp = tdna.getTypingPattern({type:1, extended:true, length:300});
-                  if(tdna.isMobile() && TypingDNA.checkMobileValidity(tp) < 0.7) {
-                      swapContent('collect', 'mobile');
-                      return false;
-                  }
-                  swapContent('collect', 'step_loading', function() {
-                      currentTypeArea.blur();
-                      /** removes focus */
-                      currentQuote = "";
-                  });
-                  form.tp.value = tp;
-                  return true;
-              } else {
-                  alert('Too many typos, please re-type');
-                  return false
-              }
-          }
 
           /** checks if Enter is pressed on text forms and calls the next function */
           initControls();
