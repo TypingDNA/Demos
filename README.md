@@ -1,4 +1,4 @@
-# TypingDNA demos
+# TypingDNA Authentication API demos
 
 
  Browse TypingDNA implementations for various use cases.
