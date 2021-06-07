@@ -18,7 +18,7 @@
 <?php require_once('./partials/navigation.php'); ?>
 <div class="container center-container">
 	<div class="col-xs-12 col-sm-6">
-		<h4>Enrolling new user <span id="enrollment-count">1</span>/3: Please type the text below</h4>
+		<h4>Enrolling new user <span id="enrollment-count">1</span>/2: Please type the text below</h4>
 		<p>
 			<span id="pAH" class="highlighted"></span><span id="pA"></span>
 		</p>
@@ -34,9 +34,8 @@
 	let enrollmentCount = 0;
 	const tdna = new TypingDNA();
 	const quotes = [
-		'Life is not a matter of place, things or comfort; rather, it concerns the basic human rights of family, country, justice and human dignity.',
-		'Don Knotts was a really big influence, especially on the Steve Allen show. I mean, look at the guy, his entire life is in his face.',
-		'For me, the original play becomes an historical document: This is where I was when I wrote it, and I have to move on now to something else.'
+		'This is your first text for enrollment, these texts can be edited by you as you want. But for better accuracy we suggest the initial texts to be at least 170 characters long.',
+		'You can use these texts to make sure the user agrees to your terms explicitly or to communicate important matters. You should make these two texts as different as possible.'
 	]
 
 	tdna.addTarget('inputtextbox');
@@ -56,17 +55,17 @@
 		// php doesn't know how to interpret application/json POST request
 		const formData = new FormData();
 
-        formData.append( 'tp', tdna.getTypingPattern({ type: 0, length: 200, targetId: 'inputtextbox' }) );
+        formData.append('tp', tdna.getTypingPattern({ type: 0, length: 200, targetId: 'inputtextbox' }));
 
-		fetch( '/api/auto.php', {
+		fetch('/api/enroll.php', {
 				method: 'POST',
 				body: formData
 			})
-			.then( r => r.json() )
+			.then(r => r.json())
 			.then( response => {
 
 				// reload current page and let php redirect to verify.php page
-				if( enrollmentCount === quotes.length - 1 ) {
+				if(enrollmentCount === 1) {
 					window.location.reload();
 					return;
 				}

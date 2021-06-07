@@ -1,0 +1,134 @@
+
+html * {
+    font-family: 'Roboto', arial, sans-serif;
+}
+
+h4 {
+    font-weight: bold;
+    text-transform: none;
+    padding-bottom: 15px;
+}
+
+a {
+    color: #007fff;
+}
+
+nav {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 0;
+}
+
+#username {
+    margin-right: 15px;
+}
+
+.user-info {
+    display: flex;
+}
+
+.user-info .btn {
+    display: flex;
+    align-items: center;
+}
+
+.username-container {
+    display: flex;
+    flex-direction: column;
+}
+
+div.step {
+    float: left;
+    max-width: 900px;
+    display: none;
+    opacity: 0;
+    transition: opacity .20s ease-in-out;
+    -moz-transition: opacity .20s ease-in-out;
+    -webkit-transition: opacity .20s ease-in-out;
+}
+
+.result {
+    background-color: #ededed;
+    color: #666666;
+    padding: 1px 11px 1px 11px;
+    border-radius: 10px;
+    margin: 0 0 8px 5px;
+    display: inline-block;
+    font-weight: 400;
+}
+
+.result-red {
+    background-color: #f6e1e1;
+    color: #c70000;
+    padding: 1px 11px 1px 11px;
+    border-radius: 10px;
+    margin: 0 0 8px 5px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.result-green {
+    background-color: #d7efde;
+    color: #45bb64;
+    padding: 1px 11px 1px 11px;
+    border-radius: 10px;
+    margin: 0 0 8px 5px;
+    display: inline-block;
+    font-weight: 400;
+}
+
+div.message {
+    float: left;
+    clear: both;
+    max-width: 600px;
+}
+
+p {
+    max-width: 680px;
+    font-size: 14px;
+}
+
+span.highlighted {
+    color: #999;
+}
+
+.btn:hover, .btn:focus, .btn:active {
+    outline: none;
+}
+
+a.btn-colors {
+    color: #fff;
+    background-color: #007fff;
+    border-color: #007fff;
+}
+
+a.btn-colors:hover {
+    color: #fff;
+    background-color: #3998F7;
+    border-color: #3998F7;
+}
+
+#pA1, #pA {
+    background-color: #ffd8c4;
+}
+
+.action-container{
+    margin-top: 15px;
+}
+
+.panel-body .name{
+    font-weight: 300;
+}
+
+#verify-container, #stats-container, #reset-btn, #verify-btn, #enrolled-text {
+    transition: 300ms linear opacity;
+}
+
+#stats-container, #enrolled-text {
+    opacity: 0;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+}

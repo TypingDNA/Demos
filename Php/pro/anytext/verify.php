@@ -39,6 +39,7 @@
 				<div class="name">Confidence<span id="confidence" class="result"></span></div>
 				<div class="name">Device<span id="device" class="result"></span></div>
 				<div class="name">Enrollments<span id="enrollments" class="result"></span></div>
+				<div class="name">Score<span id="score" class="result"></span></div>
 			</div>
 		</div>
 		<p id="enrolled-text">This typing pattern has been automatically enrolled, as the score > 90</p>
@@ -71,31 +72,31 @@
 		const resetBtn = document.querySelector('#reset-btn');
 
         formData.append('tp', tdna.getTypingPattern({ type: 0, length: 200, targetId: 'inputtextbox' }));
-        formData.append('check_user', 1);
 
         verifyBtn.classList.add('disabled');
         document.querySelector('#inputtextbox').disabled = true;
 
-		fetch('/api/auto.php', {
+		fetch('/api/verify.php', {
 				method: 'POST',
 				body: formData
 			})
 			.then(r => r.json())
-			.then( ({ user, auto }) => {
+			.then( ({ enrolled, user, verify }) => {
 
 				const resultElement = document.querySelector("#result");
 
-				resultElement.textContent = auto.result === 1 ? 'true' : 'false';
-				resultElement.classList.remove( ...resultElement.classList );
-				resultElement.classList.add( auto.result === 1 ? 'result-green' : 'result-red' );
+				resultElement.textContent = verify.result === 1 ? 'true' : 'false';
+				resultElement.classList.remove(...resultElement.classList);
+				resultElement.classList.add(verify.result === 1 ? 'result-green' : 'result-red');
 
-				document.querySelector("#confidence").textContent = auto.high_confidence === 1 ? 'High' : 'Low';
+				document.querySelector("#confidence").textContent = verify.confidence;
 				document.querySelector("#device").textContent = 'desktop';
 				document.querySelector("#enrollments").textContent = user.count;
+				document.querySelector("#score").textContent = verify.score;
 
 				document.querySelector("#stats-container").style.opacity = 1;
 
-				if( auto.enrollment === 1 ) {
+				if(enrolled) {
 					document.querySelector('#enrolled-text').style.opacity = 1;
 				}
 

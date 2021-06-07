@@ -2,7 +2,7 @@
 
 	require_once('./_init.php');
 
-	if( !isset($_SESSION['username']) || !$_SESSION['username'] ) {
+	if( !isset($_SESSION['username']) || !$_SESSION['username'] ){
 		header('Location: /');
 	}
 
@@ -10,7 +10,7 @@
 
 	$user = $tdcp->checkuser( generateUsernameHash($_SESSION['username']) );
 
-	if( $user->count < 2 ) {
+	if( $user->count < 3 ) {
 		header('Location: /enroll.php');
 	}
 ?>
@@ -20,10 +20,11 @@
 	<div id="verify-container" class="col-xs-6">
 		<h4>Please type the text below (typos allowed):</h4>
 		<p>
-			<span class="highlighted" id="pAH"></span><span id="pA">Do not display similar texts to the enrollment ones. For best results, it is mandatory to have completely different samples for verification.</span>
+			<span class="highlighted" id="pAH">
+			</span><span id="pA">We need you to type this text in order to make sure it is you.</span>
 		</p>
 		<div style="max-width:600px;">
-		<textarea class="form-control" rows="5" cols="100" id="inputtextbox" name="inputtextbox" oncopy="return false" onpaste="return false"
+		<textarea class="form-control" rows="1" cols="100" id="inputtextbox" name="inputtextbox" oncopy="return false" onpaste="return false"
 			placeholder="Type the text loaded above"></textarea>
 		</div>
 		<div class="action-container">
@@ -39,6 +40,7 @@
 				<div class="name">Confidence<span id="confidence" class="result"></span></div>
 				<div class="name">Device<span id="device" class="result"></span></div>
 				<div class="name">Enrollments<span id="enrollments" class="result"></span></div>
+				<div class="name">Score<span id="score" class="result"></span></div>
 			</div>
 		</div>
 		<p id="enrolled-text">This typing pattern has been automatically enrolled, as the score > 90</p>
@@ -46,7 +48,7 @@
 </div>
 <script>
 
-	const currentQuote = 'Do not display similar texts to the enrollment ones. For best results, it is mandatory to have completely different samples for verification.'; /** the text to be typed at a each step, to be set independently */
+	const currentQuote = 'We need you to type this text in order to make sure it is you.'; /** the text to be typed at a each step, to be set independently */
 	const tdna = new TypingDNA();
 
 	const reset = () => {
@@ -70,32 +72,32 @@
 		const verifyBtn = document.querySelector('#verify-btn');
 		const resetBtn = document.querySelector('#reset-btn');
 
-        formData.append('tp', tdna.getTypingPattern({ type: 0, length: 200, targetId: 'inputtextbox' }));
-        formData.append('check_user', 1);
+        formData.append('tp', tdna.getTypingPattern({ type: 1, text: currentQuote, targetId: 'inputtextbox' }));
 
         verifyBtn.classList.add('disabled');
         document.querySelector('#inputtextbox').disabled = true;
 
-		fetch('/api/auto.php', {
+		fetch('/api/verify.php', {
 				method: 'POST',
 				body: formData
 			})
 			.then(r => r.json())
-			.then( ({ user, auto }) => {
+			.then( ({ enrolled, user, verify }) => {
 
 				const resultElement = document.querySelector("#result");
 
-				resultElement.textContent = auto.result === 1 ? 'true' : 'false';
-				resultElement.classList.remove( ...resultElement.classList );
-				resultElement.classList.add( auto.result === 1 ? 'result-green' : 'result-red' );
+				resultElement.textContent = verify.result === 1 ? 'true' : 'false';
+				resultElement.classList.remove(...resultElement.classList);
+				resultElement.classList.add(verify.result === 1 ? 'result-green' : 'result-red');
 
-				document.querySelector("#confidence").textContent = auto.high_confidence === 1 ? 'High' : 'Low';
+				document.querySelector("#confidence").textContent = verify.confidence;
 				document.querySelector("#device").textContent = 'desktop';
 				document.querySelector("#enrollments").textContent = user.count;
+				document.querySelector("#score").textContent = verify.score;
 
 				document.querySelector("#stats-container").style.opacity = 1;
 
-				if( auto.enrollment === 1 ) {
+				if(enrolled) {
 					document.querySelector('#enrolled-text').style.opacity = 1;
 				}
 
@@ -146,7 +148,12 @@
 			if( stackLength && stackLength < currentQuote.length * 0.9) return;
 
 			if(fastCompareTexts(inputTextBox.value, currentQuote) <= 0.7) {
+
 				alert('Too many typos, please re-type');
+
+				tdna.reset();
+				document.querySelector('#inputtextbox').value = '';
+
 				return;
 			}
 

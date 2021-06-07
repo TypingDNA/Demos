@@ -2,7 +2,7 @@
 
 	require_once('./_init.php');
 
-	if( !isset($_SESSION['username']) || !$_SESSION['username'] ) {
+	if( !isset($_SESSION['username']) || !$_SESSION['username'] ){
 		header('Location: /');
 	}
 
@@ -10,7 +10,7 @@
 
 	$user = $tdcp->checkuser( generateUsernameHash($_SESSION['username']) );
 
-	if( $user->count < 2 ) {
+	if( $user->count < 3 ) {
 		header('Location: /enroll.php');
 	}
 ?>
@@ -20,10 +20,11 @@
 	<div id="verify-container" class="col-xs-6">
 		<h4>Please type the text below (typos allowed):</h4>
 		<p>
-			<span class="highlighted" id="pAH"></span><span id="pA">Do not display similar texts to the enrollment ones. For best results, it is mandatory to have completely different samples for verification.</span>
+			<span class="highlighted" id="pAH">
+			</span><span id="pA">We need you to type this text in order to make sure it is you.</span>
 		</p>
 		<div style="max-width:600px;">
-		<textarea class="form-control" rows="5" cols="100" id="inputtextbox" name="inputtextbox" oncopy="return false" onpaste="return false"
+		<textarea class="form-control" rows="1" cols="100" id="inputtextbox" name="inputtextbox" oncopy="return false" onpaste="return false"
 			placeholder="Type the text loaded above"></textarea>
 		</div>
 		<div class="action-container">
@@ -46,7 +47,7 @@
 </div>
 <script>
 
-	const currentQuote = 'Do not display similar texts to the enrollment ones. For best results, it is mandatory to have completely different samples for verification.'; /** the text to be typed at a each step, to be set independently */
+	const currentQuote = 'We need you to type this text in order to make sure it is you.'; /** the text to be typed at a each step, to be set independently */
 	const tdna = new TypingDNA();
 
 	const reset = () => {
@@ -70,7 +71,7 @@
 		const verifyBtn = document.querySelector('#verify-btn');
 		const resetBtn = document.querySelector('#reset-btn');
 
-        formData.append('tp', tdna.getTypingPattern({ type: 0, length: 200, targetId: 'inputtextbox' }));
+        formData.append('tp', tdna.getTypingPattern({ type: 1, text: currentQuote, targetId: 'inputtextbox' }));
         formData.append('check_user', 1);
 
         verifyBtn.classList.add('disabled');
@@ -146,7 +147,12 @@
 			if( stackLength && stackLength < currentQuote.length * 0.9) return;
 
 			if(fastCompareTexts(inputTextBox.value, currentQuote) <= 0.7) {
+
 				alert('Too many typos, please re-type');
+
+				tdna.reset();
+				document.querySelector('#inputtextbox').value = '';
+
 				return;
 			}
 
